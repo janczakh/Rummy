@@ -11,7 +11,6 @@ public class RummyApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RummyApplication.class, args);
-		GameEngine engine = new GameEngine();
 	}
 
 }

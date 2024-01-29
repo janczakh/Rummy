@@ -1,28 +1,29 @@
 package Rummy.Websockets;
 
-import Rummy.Services.WebsocketService;
+import commons.Pair;
 import commons.WebsocketMessage;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Websocket server to handle connections with clients
+ * For each game, a new one should be instantiated
+ */
 public class Server {
-    private ArrayList<ConnectionToClient> clientList;
-    private LinkedBlockingQueue<WebsocketMessage> messages;
+    private HashMap<InetAddress, ConnectionToClient> clientList;
+    private LinkedBlockingQueue<Pair<InetAddress, WebsocketMessage>> messages;
     private ServerSocket serverSocket;
 
-    public Server(int port, LinkedBlockingQueue<WebsocketMessage> messages) {
-        clientList = new ArrayList<ConnectionToClient>();
+    public Server(int port, LinkedBlockingQueue<Pair<InetAddress, WebsocketMessage>> messages) {
+        clientList = new HashMap<>();
         this.messages = messages;
         try {
             serverSocket = new ServerSocket(port);
@@ -30,12 +31,13 @@ public class Server {
             e.printStackTrace();
         }
 
+        // Accepts new connection
         Thread accept = new Thread() {
             public void run(){
                 while(true){
                     try{
                         Socket s = serverSocket.accept();
-                        clientList.add(new ConnectionToClient(s));
+                        clientList.put(s.getInetAddress(), new ConnectionToClient(s));
                         System.out.println("Client connected");
                     }
                     catch(IOException e){ e.printStackTrace(); }
@@ -57,13 +59,15 @@ public class Server {
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
             System.out.println("initialized conn");
+
+            // Accepts messages from a connection
             Thread read = new Thread(){
                 public void run(){
                     while(true){
                         try{
                             Object obj = in.readObject();
                             if (obj instanceof WebsocketMessage wm) {
-                                messages.put(wm);
+                                messages.put(new Pair(socket.getInetAddress(), wm));
                             } else {
                                 System.out.println("Received incorrect message type");
                             }
@@ -89,12 +93,12 @@ public class Server {
         }
     }
 
-    public void sendToOne(int index, WebsocketMessage message)throws IndexOutOfBoundsException {
-        clientList.get(index).write(message);
+    public void sendToOne(InetAddress inet, WebsocketMessage message)  throws IndexOutOfBoundsException {
+        clientList.get(inet).write(message);
     }
 
     public void sendToAll(WebsocketMessage message){
-        for(ConnectionToClient client : clientList)
+        for(ConnectionToClient client : clientList.values())
             client.write(message);
     }
 

@@ -3,6 +3,7 @@ package commons;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 
 //GAME MODE MOVEMENTS:
 //P->S Join lobby
@@ -13,10 +14,10 @@ import java.io.Serializable;
 //ERROR
 
 
-
+/**
+ * Parent of all messages sent over the network
+ */
 @Data
-public class WebsocketMessage implements Serializable {
-
-    private final Player fromPlayer;
+public abstract class WebsocketMessage implements Serializable {
 
 }

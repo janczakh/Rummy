@@ -1,37 +1,24 @@
 package RummyClient.Communication;
 
+import commons.WebsocketMessage;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class WebsocketClient {
     private ConnectionToServer server;
-    private LinkedBlockingQueue<Object> messages;
     private Socket socket;
+    private LinkedBlockingQueue<WebsocketMessage> messages;
 
-    public WebsocketClient(String IPAddress, int port) throws IOException{
+    public WebsocketClient(String IPAddress, int port, LinkedBlockingQueue<WebsocketMessage> messages) throws IOException{
         socket = new Socket(IPAddress, port);
-        messages = new LinkedBlockingQueue<Object>();
         server = new ConnectionToServer(socket);
-
-        Thread messageHandling = new Thread() {
-            public void run(){
-                while(true){
-                    try{
-                        Object message = messages.take();
-                        // Do some handling here...
-                        System.out.println("Message Received: " + message);
-                    }
-                    catch(InterruptedException e){ }
-                }
-            }
-        };
-
-        messageHandling.setDaemon(true);
-        messageHandling.start();
+        this.messages = messages;
     }
 
     private class ConnectionToServer {
@@ -49,7 +36,11 @@ public class WebsocketClient {
                     while(true){
                         try{
                             Object obj = in.readObject();
-                            messages.put(obj);
+                            if (obj instanceof WebsocketMessage wm) {
+                                messages.put(wm);
+                            } else {
+                                throw new RuntimeException("Received incorrect message type");
+                            }
                         }
                         catch (SocketException e) {
                             break;
@@ -75,5 +66,9 @@ public class WebsocketClient {
 
     public void send(Object obj) {
         server.write(obj);
+    }
+
+    public InetAddress getInetAdress() {
+        return socket.getInetAddress();
     }
 }
