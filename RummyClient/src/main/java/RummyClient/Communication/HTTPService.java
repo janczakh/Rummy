@@ -12,7 +12,11 @@ import org.glassfish.jersey.client.ClientConfig;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
-
+/**
+ * LEGACY
+ * Probably unnecessary, used for HTTP connections
+ * In case we ever decide to use those
+ */
 public class HTTPService {
 
     private static final Client client = ClientBuilder.newClient(new ClientConfig());
