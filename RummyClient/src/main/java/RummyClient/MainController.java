@@ -1,7 +1,6 @@
 package RummyClient;
 
 import RummyClient.Communication.Constants;
-import RummyClient.Communication.Models.LobbyModel;
 import RummyClient.Communication.WebsocketClient;
 import RummyClient.Communication.WebsocketService;
 import commons.ExampleWebsocketMessage;
@@ -24,14 +23,13 @@ public class MainController {
     /**
      * Joins a lobby and initializes a websocket connection with the server
      */
-    public LobbyModel joinLobby(String ip, String username) {
+    public void joinLobby(String ip, String username) {
         messages = new LinkedBlockingQueue<WebsocketMessage>();
         client = WebsocketService.initializeConnection(ip, Constants.WEBSOCKET_PORT, messages);
         Constants.SERVER_IP = ip;
         beginMessageHandling();
         WebsocketMessage mess  = new ExampleWebsocketMessage(new Player(username));
         WebsocketService.sendMessage(client, mess);
-        return null;
     }
 
     public void beginMessageHandling() {
