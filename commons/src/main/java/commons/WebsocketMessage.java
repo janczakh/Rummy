@@ -1,6 +1,8 @@
-package Rummy.DataStructures;
+package commons;
 
 import lombok.Data;
+
+import java.io.Serializable;
 
 //GAME MODE MOVEMENTS:
 //P->S Join lobby
@@ -13,7 +15,7 @@ import lombok.Data;
 
 
 @Data
-public class WebsocketMessage {
+public class WebsocketMessage implements Serializable {
 
     private final Player fromPlayer;
 

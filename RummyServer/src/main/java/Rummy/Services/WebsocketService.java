@@ -1,7 +1,7 @@
 package Rummy.Services;
 
-import Rummy.DataStructures.WebsocketMessage;
 import Rummy.Websockets.Server;
+import commons.WebsocketMessage;
 
 public class WebsocketService {
 

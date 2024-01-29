@@ -1,4 +1,4 @@
-package Communication.Models;
+package RummyClient.Communication.Models;
 
 import lombok.Data;
 
@@ -12,6 +12,6 @@ public class LobbyModel {
 
     // List of other players might be changed into a Player object
     // If we decide to add things like current score or avatars
-    List<String> players; //List of other players
+    List<String> playerList; //List of other players
 
 }

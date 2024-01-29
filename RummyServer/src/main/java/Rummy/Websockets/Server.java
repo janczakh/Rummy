@@ -1,7 +1,7 @@
 package Rummy.Websockets;
 
-import Rummy.DataStructures.WebsocketMessage;
 import Rummy.Services.WebsocketService;
+import commons.WebsocketMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,9 +21,9 @@ public class Server {
     private LinkedBlockingQueue<WebsocketMessage> messages;
     private ServerSocket serverSocket;
 
-    public Server(int port) {
+    public Server(int port, LinkedBlockingQueue<WebsocketMessage> messages) {
         clientList = new ArrayList<ConnectionToClient>();
-        messages = new LinkedBlockingQueue<WebsocketMessage>();
+        this.messages = messages;
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException e) {
@@ -45,24 +45,6 @@ public class Server {
 
         accept.setDaemon(true);
         accept.start();
-
-        Thread messageHandling = new Thread() {
-            public void run(){
-                while(true){
-                    try{
-                        WebsocketMessage message = messages.take();
-                        WebsocketService.handleMessage(this.getParent(), message);
-                        System.out.println("Message Received: " + message);
-                    }
-                    catch(InterruptedException e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-
-        messageHandling.setDaemon(true);
-        messageHandling.start();
     }
 
     private class ConnectionToClient {
@@ -74,6 +56,7 @@ public class Server {
             this.socket = socket;
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
+            System.out.println("initialized conn");
             Thread read = new Thread(){
                 public void run(){
                     while(true){
